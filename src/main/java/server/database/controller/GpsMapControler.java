@@ -30,7 +30,11 @@ public class GpsMapControler {
             if (stringId.isEmpty()) throw new Exception("Cannot find id parameter");
             int id = Integer.parseInt(stringId);
             map = gpsMapDomain.getGpsMapFromId(id);
-            if (map == null) throw new Exception(String.format("Cannot find gps map with given id : %d in the database", id));
+            if (map == null) {
+                System.out.println(String.format("Cannot find gps map with given id : %d in the database", id));
+                res.status(404);
+                return "";
+            }
             GetGpsMapViewModel gpsMapVM = GetGpsMapViewModel.createGpsMapViewModel(map);
             res.status(200);
             return WebUtils.CreateJsonFromModel(gpsMapVM);
@@ -63,7 +67,7 @@ public class GpsMapControler {
             int id = gpsMapDomain.insertGpsMap(gpsMap);
             res.status(201);
             return String.format("{ id : %d}", id);
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             res.status(400);
             return "";
