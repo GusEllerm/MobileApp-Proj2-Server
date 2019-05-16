@@ -60,6 +60,9 @@ public class App {
         get(Routes.GPS_MAP, gpsMapControler.routeGetGpsMap());
         get(Routes.GPS_MAP_ID, gpsMapControler.routeGetGpsMapsIds());
 
+        patch(Routes.GPS_MAP_VOTE, gpsMapControler.routePatchVote());
+        post(Routes.GPS_MAP_VOTE, gpsMapControler.routePostVote());
+
 
         get("*", (request, response) -> {
             response.status(404);
