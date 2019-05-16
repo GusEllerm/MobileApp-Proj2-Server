@@ -1,6 +1,7 @@
 package server.database.dao;
 
 import server.database.DatabaseUtils;
+import server.database.enums.OrderType;
 import server.models.Fragment;
 import server.models.GpsMap;
 
@@ -8,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GpsMapDomain {
@@ -76,4 +78,75 @@ public class GpsMapDomain {
             return gpsMap.getId();
         }
     }
+
+
+    public List<Integer> getGpsMapIds(String category, OrderType order, int page, int limit) {
+        List<Integer> mapIds = new ArrayList<>();
+        String query = "";
+        int offset = (page - 1) * limit;
+        if (!category.isEmpty()) {
+            query += " WHERE lower(category) = " + category.toLowerCase();
+        }
+        query += order.getSql();
+        query += " LIMIT " + limit + " OFFSET " + offset;
+        try (
+                Connection connection = DatabaseUtils.getDatabaseConnection();
+                PreparedStatement statement = connection.prepareStatement("SELECT map_id FROM gps_map" + query)
+        ) {
+            try (ResultSet set = statement.executeQuery()) {
+                while(set.next()) {
+                    mapIds.add(set.getInt("map_id"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+        }
+        return mapIds;
+    }
+
+
+    public int addVote(int id, int amount) throws SQLException {
+        try (
+                Connection connection = DatabaseUtils.getDatabaseConnection();
+                PreparedStatement statement1 = connection.prepareStatement("SELECT votes FROM gps_map WHERE map_id = ?");
+                PreparedStatement statement2 = connection.prepareStatement("UPDATE gps_map SET votes = ? WHERE map_id = ?")
+        ) {
+            statement1.setInt(1, id);
+            try (ResultSet set = statement1.executeQuery()) {
+                if (set.next()) {
+                    int votes = set.getInt("votes");
+                    votes += amount;
+                    statement2.setInt(1, votes);
+                    statement2.setInt(2, id);
+                    statement2.executeUpdate();
+                    return votes;
+                } else throw new SQLException("Cannot find gps map with id");
+            }
+        } catch (SQLException e) {
+            throw new SQLException(e.getMessage());
+        }
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

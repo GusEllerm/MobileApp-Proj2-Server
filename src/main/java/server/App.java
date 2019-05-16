@@ -58,7 +58,7 @@ public class App {
 
         post(Routes.GPS_MAP, gpsMapControler.routePostGpsMap());
         get(Routes.GPS_MAP, gpsMapControler.routeGetGpsMap());
-
+        get(Routes.GPS_MAP_ID, gpsMapControler.routeGetGpsMapsIds());
 
 
         get("*", (request, response) -> {
