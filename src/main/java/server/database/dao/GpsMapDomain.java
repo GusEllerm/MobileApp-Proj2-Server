@@ -80,6 +80,29 @@ public class GpsMapDomain {
     }
 
 
+    public int patchGpsMap(GpsMap gpsMap) throws SQLException {
+        GpsMap databaseMap = getGpsMapFromId(gpsMap.getId());
+        if (!isGpsMapEqual(databaseMap, gpsMap)) {
+            try (
+                    Connection connection = DatabaseUtils.getDatabaseConnection();
+                    PreparedStatement statement = connection.prepareStatement("UPDATE gps_map SET map_type = ?, map_title = ?, " +
+                            "fragment_amount = ?, category = ? WHERE map_id = ?")
+            ) {
+                statement.setString(1, gpsMap.getMapType());
+                statement.setString(2, gpsMap.getMapTitle());
+                statement.setInt(3, gpsMap.getFragmentAmount());
+                statement.setString(4, gpsMap.getCategory());
+                statement.setInt(5, gpsMap.getId());
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                throw new SQLException(e.getMessage());
+            }
+        }
+        fragmentDomain.updateFragments(gpsMap, databaseMap);
+        return gpsMap.getId();
+    }
+
+
     public List<Integer> getGpsMapIds(String category, OrderType order, int page, int limit) {
         List<Integer> mapIds = new ArrayList<>();
         String query = "";
@@ -126,6 +149,12 @@ public class GpsMapDomain {
         } catch (SQLException e) {
             throw new SQLException(e.getMessage());
         }
+    }
+
+
+    private boolean isGpsMapEqual(GpsMap obj1, GpsMap obj2) {
+        return (obj1.getFragments() == obj2.getFragments() && obj1.getCategory().equals(obj2.getCategory()) &&
+                obj1.getMapType().equals(obj2.getMapTitle()) && obj1.getMapTitle().equals(obj2.getMapTitle()));
     }
 
 }

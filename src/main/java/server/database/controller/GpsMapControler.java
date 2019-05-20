@@ -131,6 +131,37 @@ public class GpsMapControler {
         }
     };
 
+    public Route routePatchGpsMap() {return patchGpsMap;}
+    /**
+     * PATChes a GpsMap
+     */
+    private Route patchGpsMap = (Request req, Response res) -> {
+        String strId = req.queryParamOrDefault("id", "");
+        if (strId.isEmpty()) {
+            res.status(400);
+            return "";
+        }
+        GpsMap gpsMap;
+        if (req.body().isEmpty()) {
+            res.status(400);
+            return "";
+        }
+        try {
+            gpsMap = (GpsMap) WebUtils.parseBody(req.body(), GpsMap.class);
+            int mapId = Integer.parseInt(strId);
+            gpsMap.setId(mapId);
+            System.out.println("Patching gps map");
+            int id = gpsMapDomain.patchGpsMap(gpsMap);
+            res.status(200);
+            return String.format("{ id : %d}", id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            res.status(500);
+            return "";
+        }
+    };
+
+
     public Route routePatchVote() {return patchVote;}
     /**
      * Removes a vote to a map

@@ -57,6 +57,7 @@ public class App {
         });
 
         post(Routes.GPS_MAP, gpsMapControler.routePostGpsMap());
+        patch(Routes.GPS_MAP, gpsMapControler.routePatchGpsMap());
         get(Routes.GPS_MAP, gpsMapControler.routeGetGpsMap());
         get(Routes.GPS_MAP_ID, gpsMapControler.routeGetGpsMapsIds());
 

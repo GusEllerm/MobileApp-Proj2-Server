@@ -93,4 +93,68 @@ public class FragmentDomain {
         }
         return fragments;
     }
+
+    public void updateFragment(Fragment frag) throws SQLException {
+        try (
+                Connection connection = DatabaseUtils.getDatabaseConnection();
+                PreparedStatement statement = connection.prepareStatement("UPDATE fragment SET line_colour = ?, zoom = ? " +
+                        "WHERE frag_id = ?")
+        ) {
+            statement.setString(1, frag.getLineColour());
+            statement.setInt(2, frag.getZoom());
+            statement.setInt(3, frag.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLException(e.getMessage());
+        }
+    }
+
+    public void deleteFragment(Fragment fragment) throws SQLException {
+        try (
+                Connection connection = DatabaseUtils.getDatabaseConnection();
+                PreparedStatement statement = connection.prepareStatement("DELETE FROM fragment WHERE frag_id = ?")
+        ) {
+            statement.setInt(1, fragment.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLException(e.getMessage());
+        }
+    }
+
+
+    public void updateFragments(GpsMap update, GpsMap old) throws SQLException{
+        List<Fragment> oldFragments = old.getFragments();
+        for (Fragment fragment : update.getFragments()) {
+            Fragment oldFrag = getFragmentFromList(fragment, oldFragments);
+            if (oldFrag != null) {
+                // updating fragment
+                if (!isFragmentEqual(fragment, oldFrag)) {
+                    updateFragment(fragment);
+                }
+                coordinateDomain.updateCoordinates(fragment, oldFrag);
+                oldFragments.remove(oldFrag);
+            } else {
+                // new fragment
+                fragment.setGpsMapId(update.getId());
+                int fragId = saveFragment(fragment);
+                fragment.setId(fragId);
+                if (fragId > 0) coordinateDomain.saveAllCoordinates(fragment.getCoordinates(), fragId);
+            }
+        }
+        for (Fragment leftOverFragment : oldFragments) {
+            deleteFragment(leftOverFragment);
+        }
+    }
+
+
+    private boolean isFragmentEqual(Fragment obj1, Fragment obj2) {
+        return (obj1.getLineColour().equals(obj2.getLineColour()) && obj1.getZoom() == obj2.getZoom());
+    }
+
+    private Fragment getFragmentFromList(Fragment fragment, List<Fragment> fragments) {
+        for (Fragment fragFromList : fragments) {
+            if (fragFromList.getId() == fragment.getId()) return fragFromList;
+        }
+        return null;
+    }
 }

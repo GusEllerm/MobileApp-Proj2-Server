@@ -75,4 +75,66 @@ public class CoordinateDomain {
             return false;
         }
     }
+
+    public void deleteCoordinate(Coordinate coordinate) throws SQLException {
+        try (
+                Connection connection = DatabaseUtils.getDatabaseConnection();
+                PreparedStatement statement = connection.prepareStatement("DELETE FROM coords WHERE coords_id = ?")
+        ) {
+            statement.setInt(1, coordinate.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLException(e.getMessage());
+        }
+    }
+
+    public void updateCoordinate(Coordinate coordinate) throws SQLException {
+        try (
+                Connection connection = DatabaseUtils.getDatabaseConnection();
+                PreparedStatement statement = connection.prepareStatement("UPDATE coords SET long = ?, lat = ?, " +
+                        "sequence = ? WHERE coords_id = ?")
+        ) {
+            statement.setDouble(1, coordinate.getLongitude());
+            statement.setDouble(2, coordinate.getLatitude());
+            statement.setInt(3, coordinate.getSequence());
+            statement.setInt(4, coordinate.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLException(e.getMessage());
+        }
+    }
+
+    public void updateCoordinates(Fragment updateFragment, Fragment oldFragment) throws SQLException {
+        List<Coordinate> oldCoords = oldFragment.getCoordinates();
+        List<Coordinate> coordinatesToSave = new ArrayList<>();
+        for (Coordinate coord : updateFragment.getCoordinates()) {
+            Coordinate oldCoord = getCoordinateFromList(coord, oldCoords);
+            if (oldCoord != null) {
+                // update old coordinate
+                if (!isCoordinateEqual(oldCoord, coord)) {
+                    updateCoordinate(coord);
+                }
+            } else {
+                // insert coordinate
+                coordinatesToSave.add(coord);
+            }
+        }
+        saveAllCoordinates(coordinatesToSave, updateFragment.getId());
+        for (Coordinate leftOverCoordinate : oldCoords) {
+            deleteCoordinate(leftOverCoordinate);
+        }
+    }
+
+
+    private Coordinate getCoordinateFromList(Coordinate coordinate, List<Coordinate> list) {
+        for (Coordinate coordFromList : list) {
+            if (coordFromList.getId() == coordFromList.getId()) return coordFromList;
+        }
+        return null;
+    }
+
+    private boolean isCoordinateEqual(Coordinate obj1, Coordinate obj2) {
+        return (obj1.getLatitude() == obj2.getLatitude() && obj1.getLatitude() == obj2.getLongitude() &&
+                obj1.getSequence() == obj2.getSequence());
+    }
 }
