@@ -116,6 +116,7 @@ public class CoordinateDomain {
                 }
             } else {
                 // insert coordinate
+                coord.setFragmentId(updateFragment.getId());
                 coordinatesToSave.add(coord);
             }
         }
