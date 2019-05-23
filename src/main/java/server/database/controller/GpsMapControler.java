@@ -95,6 +95,7 @@ public class GpsMapControler {
             gpsMap = (GpsMap) WebUtils.parseBody(req.body(), GpsMap.class);
             gpsMap.setVotes(0); //reset votes
             System.out.println("Saving gps map");
+            System.out.println(gpsMap.getImageDataAsString().length() * 6);
             int id = gpsMapDomain.insertGpsMap(gpsMap);
             res.status(201);
             return String.format("{ id : %d}", id);

@@ -9,7 +9,8 @@ CREATE TABLE gps_map (
   fragment_amount INT NOT NULL,
   map_title VARCHAR(32) NOT NULL,
   category VARCHAR(32) NOT NULL,
-  votes INT DEFAULT 0
+  votes INT DEFAULT 0,
+  image_data TEXT
 );
 
 

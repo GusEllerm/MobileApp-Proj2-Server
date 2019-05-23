@@ -11,6 +11,7 @@ public class GpsMap {
     private String mapTitle;
     private String category;
     private int votes;
+    private String imageData;
     private List<Fragment> fragments;
 
     /**
@@ -22,13 +23,14 @@ public class GpsMap {
      * @param category the type of category
      * @param votes the number of votes for the image / map
      */
-    public GpsMap(int id, String mapType, int fragmentAmount, String mapTitle, String category, int votes) {
+    public GpsMap(int id, String mapType, int fragmentAmount, String mapTitle, String category, int votes, String imageData) {
         this.id = id;
         this.mapType = mapType;
         this.fragmentAmount = fragmentAmount;
         this.mapTitle = mapTitle;
         this.category = category;
         this.votes = votes;
+        this.imageData = imageData;
     }
 
     public GpsMap(String mapType, int fragmentAmount, String mapTitle, String category, int votes, List<Fragment> fragments) {
@@ -66,6 +68,15 @@ public class GpsMap {
 
     public String getMapType() {
         return mapType;
+    }
+
+    public String getImageDataAsString() {
+        if (imageData == null) return "";
+        else return imageData;
+    }
+
+    public void setImageData(String imageData) {
+        this.imageData = imageData;
     }
 
     public void setId(int id) {

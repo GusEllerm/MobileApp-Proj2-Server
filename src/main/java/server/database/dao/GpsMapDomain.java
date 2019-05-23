@@ -40,7 +40,8 @@ public class GpsMapDomain {
                             set.getInt("fragment_amount"),
                             set.getString("map_title"),
                             set.getString("category"),
-                            set.getInt("votes"));
+                            set.getInt("votes"),
+                            set.getString("image_data"));
                     List<Fragment> fragments = fragmentDomain.getAllFragmentsFromGpsMap(map);
                     map.setFragments(fragments);
                     return map;
@@ -59,13 +60,14 @@ public class GpsMapDomain {
         try (
                 Connection connection = DatabaseUtils.getDatabaseConnection();
                 PreparedStatement statement = connection.prepareStatement("INSERT INTO gps_map (map_type, fragment_amount, " +
-                        "map_title, category, votes) VALUES (?, ?, ?, ?, ?)")
+                        "map_title, category, votes, image_data) VALUES (?, ?, ?, ?, ?, ?)")
         ) {
             statement.setString(1, gpsMap.getMapType());
             statement.setInt(2, gpsMap.getFragmentAmount());
             statement.setString(3, gpsMap.getMapTitle());
             statement.setString(4, gpsMap.getCategory());
             statement.setInt(5, gpsMap.getVotes());
+            statement.setString(6, gpsMap.getImageDataAsString());
             statement.executeUpdate();
             try (ResultSet set = statement.getGeneratedKeys()) {
                 if (set.next()) {
@@ -82,17 +84,20 @@ public class GpsMapDomain {
 
     public int patchGpsMap(GpsMap gpsMap) throws SQLException {
         GpsMap databaseMap = getGpsMapFromId(gpsMap.getId());
+        String imageQuery = "";
+        if (!gpsMap.getImageDataAsString().isEmpty()) imageQuery = " image_data = ?";
         if (!isGpsMapEqual(databaseMap, gpsMap)) {
             try (
                     Connection connection = DatabaseUtils.getDatabaseConnection();
                     PreparedStatement statement = connection.prepareStatement("UPDATE gps_map SET map_type = ?, map_title = ?, " +
-                            "fragment_amount = ?, category = ? WHERE map_id = ?")
+                            "fragment_amount = ?, category = ?" + imageQuery + " WHERE map_id = ?")
             ) {
                 statement.setString(1, gpsMap.getMapType());
                 statement.setString(2, gpsMap.getMapTitle());
                 statement.setInt(3, gpsMap.getFragmentAmount());
                 statement.setString(4, gpsMap.getCategory());
                 statement.setInt(5, gpsMap.getId());
+                if (!gpsMap.getImageDataAsString().isEmpty()) statement.setString(6, gpsMap.getImageDataAsString());
                 statement.executeUpdate();
             } catch (SQLException e) {
                 throw new SQLException(e.getMessage());

@@ -15,10 +15,11 @@ public class GetGpsMapViewModel {
     private String mapTitle;
     private String category;
     private int votes;
+    private String imageData;
     private List<GetFragmentViewModel> fragments;
 
     private GetGpsMapViewModel(int id, String mapType, int fragmentAmount, String mapTitle, String category, int votes,
-                               List<GetFragmentViewModel> fragments) {
+                               List<GetFragmentViewModel> fragments, String imageData) {
         this.id = id;
         this.mapType = mapType;
         this.fragmentAmount = fragmentAmount;
@@ -26,6 +27,7 @@ public class GetGpsMapViewModel {
         this.category = category;
         this.votes = votes;
         this.fragments = fragments;
+        this.imageData = imageData;
     }
 
     public static GetGpsMapViewModel createGpsMapViewModel(GpsMap map) {
@@ -36,7 +38,8 @@ public class GetGpsMapViewModel {
                 map.getMapTitle(),
                 map.getCategory(),
                 map.getVotes(),
-                GetFragmentViewModel.createListFromFragments(map.getFragments())
+                GetFragmentViewModel.createListFromFragments(map.getFragments()),
+                map.getImageDataAsString()
         );
     }
 }
